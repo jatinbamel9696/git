@@ -30,7 +30,7 @@ assume_role "$GLOBAL_ROLE_TO_ASSUME" "$GLOBAL_AWS_REGION"
 # Define variables
 AMI_NAME="test-image"
 REGION="us-east-1"
-SOURCE_BUCKET="test-create"
+SOURCE_BUCKET="test-j3"
 LOCAL_PATH="${WORKSPACE}"
 
 # Get the latest AMI ID
