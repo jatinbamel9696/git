@@ -28,7 +28,7 @@ assume_role "$GLOBAL_ROLE_TO_ASSUME" "$GLOBAL_AWS_REGION"
 #!/bin/bash
 
 # Define variables
-AMI_NAME="test-123"
+AMI_NAME="test-image"
 REGION="us-east-1"
 SOURCE_BUCKET="test-create"
 LOCAL_PATH="${WORKSPACE}"
