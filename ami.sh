@@ -2,25 +2,25 @@
 
 # Function to assume an AWS role
 assume_role() {
-  local role_arn=$1
-  local session_name=$2
+  local role_arn="$1"
+  local session_name="$2"
   CREDS=$(aws sts assume-role --role-arn "$role_arn" --role-session-name "$session_name" --output json)
-  AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.Credentials.AccessKeyId')
-  AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
-  AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
+  export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.Credentials.AccessKeyId')
+  export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.Credentials.SecretAccessKey')
+  export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.Credentials.SessionToken')
 }
 
 # Function to get the latest AMI ID
 get_latest_ami_id() {
-  local ami_name=$1
-  local region=$2
+  local ami_name="$1"
+  local region="$2"
   aws ec2 describe-images --owners self --region "${region}" --filters "Name=name,Values=${ami_name}" --query 'reverse(sort_by(Images, &CreationDate))[0].ImageId' --output text
 }
 
 # Function to wait for a store image task to complete
 wait_for_store_image_task() {
-  local ami_id=$1
-  local region=$2
+  local ami_id="$1"
+  local region="$2"
   while [ "$(aws ec2 describe-store-image-tasks --region "${region}" --image-ids "${ami_id}" --query 'StoreImageTaskResults[0].StoreTaskState' --output text)" != "Completed" ]; do
     sleep 30
   done
@@ -28,9 +28,9 @@ wait_for_store_image_task() {
 
 # Function to wait for a file to be available in S3
 wait_for_s3_file() {
-  local bucket=$1
-  local key=$2
-  local profile=$3
+  local bucket="$1"
+  local key="$2"
+  local profile="$3"
   while ! aws s3 ls "s3://${bucket}/${key}" --profile "${profile}" >/dev/null 2>&1; do
     sleep 30
   done
@@ -38,9 +38,9 @@ wait_for_s3_file() {
 
 # Function to wait for an AMI to be available
 wait_for_ami() {
-  local ami_id=$1
-  local region=$2
-  local profile=$3
+  local ami_id="$1"
+  local region="$2"
+  local profile="$3"
   while [ "$(aws ec2 describe-images --image-ids "${ami_id}" --query 'Images[0].State' --output text --region "${region}" --profile "${profile}")" != "available" ]; do
     sleep 30
   done
@@ -48,10 +48,10 @@ wait_for_ami() {
 
 # Function to share an AMI with specified accounts
 share_ami() {
-  local ami_id=$1
-  local profile=$2
+  local ami_id="$1"
+  local profile="$2"
   shift 2
-  local accounts=("$@")  # Use "$@" to pass all arguments as an array
+  local accounts=("$@")
   if [ ${#accounts[@]} -eq 0 ]; then
     echo "No accounts specified for sharing. Skipping sharing step."
     return
@@ -108,7 +108,7 @@ SHARE_REGION="us-east-2"
 SECOND_ACCOUNT_ROLE_ARN="arn:aws:iam::992382823608:role/assume-role"
 SECOND_ACCOUNT_SESSION="SecondAccountSession"
 # Define an array of account IDs
-SHARE_ACCOUNTS=()  # Replace "account_id1", "account_id2" with actual AWS account IDs
+SHARE_ACCOUNTS=("")  # Replace "account_id1", "account_id2" with actual AWS account IDs
 
 # Assume role for the second account
 assume_role "$SECOND_ACCOUNT_ROLE_ARN" "$SECOND_ACCOUNT_SESSION"
@@ -135,6 +135,4 @@ wait_for_ami "${RESTORE_TASK_ID}" "${CN_REGION}" ""
 
 # Share the restored AMI in another region
 echo "Copying to another region started"
-SHARED_AMI_ID=$(aws ec2 copy-image --source-image-id "${RESTORE_TASK_ID}" --source-region "${CN_REGION}" --region "${SHARE_REGION}" --name "${AMI_NAME}" --copy-image-tags --output text --query 'ImageId')
-
-# Wait for the AMI to become available in the
+SHARED_AMI_ID=$(aws ec2 copy-image --source-image-id "${RESTORE_TASK_ID}" --source-region "${CN_REGION}" --region "${SHARE_REGION}" --
