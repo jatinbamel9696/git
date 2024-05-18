@@ -52,11 +52,14 @@ share_ami() {
   local profile=$2
   shift 2
   local accounts=("$@")  # Use "$@" to pass all arguments as an array
+  if [ ${#accounts[@]} -eq 0 ]; then
+    echo "No accounts specified for sharing. Skipping sharing step."
+    return
+  fi
   for AWS_ACCOUNT_ID in "${accounts[@]}"; do
     aws ec2 modify-image-attribute --image-id "${ami_id}" --launch-permission "Add=[{UserId=${AWS_ACCOUNT_ID}}]" --profile "${profile}"
   done
 }
-
 
 # Define variables for the first account
 AMI_NAME="test"
@@ -102,9 +105,10 @@ echo "${AMI_NAME}" > ami_name.txt
 CN_REGION="cn-north-1"
 CHINA_BUCKET="test-j3-1"
 SHARE_REGION="us-east-2"
-SHARE_ACCOUNTS=()
 SECOND_ACCOUNT_ROLE_ARN="arn:aws:iam::992382823608:role/assume-role"
 SECOND_ACCOUNT_SESSION="SecondAccountSession"
+# Define an array of account IDs
+SHARE_ACCOUNTS=()  # Replace "account_id1", "account_id2" with actual AWS account IDs
 
 # Assume role for the second account
 assume_role "$SECOND_ACCOUNT_ROLE_ARN" "$SECOND_ACCOUNT_SESSION"
@@ -133,11 +137,4 @@ wait_for_ami "${RESTORE_TASK_ID}" "${CN_REGION}" ""
 echo "Copying to another region started"
 SHARED_AMI_ID=$(aws ec2 copy-image --source-image-id "${RESTORE_TASK_ID}" --source-region "${CN_REGION}" --region "${SHARE_REGION}" --name "${AMI_NAME}" --copy-image-tags --output text --query 'ImageId')
 
-# Wait for the AMI to become available in the shared region
-wait_for_ami "${SHARED_AMI_ID}" "${SHARE_REGION}" ""
-echo "AMI ${SHARED_AMI_ID} is available in the ${SHARE_REGION}"
-
-# Share the restored AMI with specified accounts in China region - cn-north-1
-echo "Sharing AMI ${RESTORE_TASK_ID} in China region - cn-north-1"
-share_ami "${RESTORE_TASK_ID}" SHARE_ACCOUNTS[@] ""
-
+# Wait for the AMI to become available in the
