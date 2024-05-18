@@ -47,11 +47,11 @@ wait_for_ami() {
 }
 
 # Function to share an AMI with specified accounts
-# Function to share an AMI with specified accounts
 share_ami() {
   local ami_id=$1
-  local accounts=("${!2[@]}")  # Corrected syntax to access array elements
-  local profile=$3
+  local profile=$2
+  shift 2
+  local accounts=("$@")  # Use "$@" to pass all arguments as an array
   for AWS_ACCOUNT_ID in "${accounts[@]}"; do
     aws ec2 modify-image-attribute --image-id "${ami_id}" --launch-permission "Add=[{UserId=${AWS_ACCOUNT_ID}}]" --profile "${profile}"
   done
