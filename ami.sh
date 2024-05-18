@@ -10,11 +10,10 @@ assume_role() {
   CREDS=$(aws sts assume-role --role-arn "$role_arn" --role-session-name "$session_name" --region "$aws_region" --output json)
   
   # Export the assumed credentials
-  export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.Credentials.AccessKeyId')
-  export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.Credentials.SecretAccessKey')
-  export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.Credentials.SessionToken')
+  export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | grep -o '"AccessKeyId": "[^"]*' | cut -d'"' -f4)
+  export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | grep -o '"SecretAccessKey": "[^"]*' | cut -d'"' -f4)
+  export AWS_SESSION_TOKEN=$(echo "$CREDS" | grep -o '"SessionToken": "[^"]*' | cut -d'"' -f4)
 }
-
 # Set the role ARN and AWS regions
 GLOBAL_ROLE_TO_ASSUME="arn:aws:iam::992382823608:role/assume-role"
 GLOBAL_AWS_REGION="us-east-1"
