@@ -36,10 +36,10 @@ AMI_NAME="test-image"
 REGION="us-east-1"
 SOURCE_BUCKET="test-j3"
 LOCAL_PATH="."
-FIRST_ACCOUNT_ROLE_ARN="arn:aws:iam::992382823608:role/assume-role"
+#FIRST_ACCOUNT_ROLE_ARN="arn:aws:iam::992382823608:role/assume-role"
 
 # Assume role for the first account
-assume_role "$FIRST_ACCOUNT_ROLE_ARN" "FirstAccountSession"
+#assume_role "$FIRST_ACCOUNT_ROLE_ARN" "FirstAccountSession"
 
 # Get the latest AMI ID
 AMI_ID=$(get_latest_ami_id "${AMI_NAME}" "${REGION}")
