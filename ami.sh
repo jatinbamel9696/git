@@ -61,17 +61,17 @@ ls -la "${WORKSPACE}"
 
 
 # Delete the AMI from the S3 bucket
-# aws s3api delete-object --bucket "${SOURCE_BUCKET}" --key "${AMI_ID}.bin" --region "${REGION}"
-# echo "AMI ID: ${AMI_ID} deleted from S3 bucket: ${SOURCE_BUCKET}"
+aws s3api delete-object --bucket "${SOURCE_BUCKET}" --key "${AMI_ID}.bin" --region "${REGION}"
+echo "AMI ID: ${AMI_ID} deleted from S3 bucket: ${SOURCE_BUCKET}"
 
 
-# Assume the role for China account
-assume_role "$CHINA_ROLE_TO_ASSUME" "$CHINA_AWS_REGION"
+# # Assume the role for China account
+# assume_role "$CHINA_ROLE_TO_ASSUME" "$CHINA_AWS_REGION"
 
-# Run your China account operations here
+# # Run your China account operations here
 
-# Example: List S3 buckets in the China account
-echo "List of S3 buckets in the China account:"
-aws s3 ls
+# # Example: List S3 buckets in the China account
+# echo "List of S3 buckets in the China account:"
+# aws s3 ls
 
-# End of script
+# # End of script
